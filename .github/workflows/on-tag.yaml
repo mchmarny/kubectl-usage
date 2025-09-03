@@ -24,6 +24,11 @@ jobs:
             go.sum
             **/go.sum
 
+      - name: Install Syft
+        run: |
+          set -euo pipefail
+          curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
+
       - name: Install GoReleaser
         uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a  # v6.4.0
         with:
