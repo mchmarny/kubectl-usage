@@ -63,7 +63,7 @@ brews:
     install: |
       bin.install "kusage"
     test: |
-      kusage -h"
+      system "#{bin}/kusage --help"
 
 archives:
   - id: kusage
