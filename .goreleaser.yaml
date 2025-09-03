@@ -1,0 +1,80 @@
+version: 2
+
+project_name: kubectl-usage
+
+builds:
+  - binary: kubectl-usage
+    # set the modified timestamp on the output binary to the git timestamp to ensure a reproducible build
+    mod_timestamp: &build-timestamp '{{ .CommitTimestamp }}'
+    dir: cmd/cli
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+    flags:
+      - -trimpath
+    ldflags: &build-ldflags |
+      -w
+      -s
+      -extldflags "-static"
+      -X github.com/mchmarny/kubectl-usage/pkg/cli.version={{.Version}}
+      -X github.com/mchmarny/kubectl-usage/pkg/cli.commit={{.ShortCommit}}
+      -X github.com/mchmarny/kubectl-usage/pkg/cli.date={{.Date}}
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+gomod:
+  proxy: false
+
+sboms:
+  - artifacts: binary
+
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ .Tag }}-next"
+
+report_sizes: true
+
+metadata:
+  mod_timestamp: "{{ .CommitTimestamp }}"
+
+release:
+  github:
+    owner: mchmarny
+    name: kubectl-usage
+  prerelease: auto
+
+archives:
+  - id: kubectl-usage
+    formats:
+      - binary
+    name_template: "{{ .Binary }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^lint:"
+      - "^chore: readme"
+      - "^chore: bump version"
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: "Tasks"
+      regexp: '^.*?chore(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: "Bug fixes"
+      regexp: '^.*?bug(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: Others
+      order: 999

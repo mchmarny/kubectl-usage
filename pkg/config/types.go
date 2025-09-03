@@ -1,0 +1,101 @@
+// Package config provides configuration management for kubectl-usage.
+// This package encapsulates all configuration-related types and validation logic,
+// following the single responsibility principle for distributed systems design.
+package config
+
+import (
+	"fmt"
+	"regexp"
+	"strings"
+	"time"
+)
+
+// Mode represents the analysis mode for resource usage calculation.
+type Mode string
+
+const (
+	// ModePods aggregates resource usage at the pod level
+	ModePods Mode = "pods"
+	// ModeContainers analyzes resource usage at the container level
+	ModeContainers Mode = "containers"
+)
+
+// ResourceKind represents the type of Kubernetes resource to analyze.
+type ResourceKind string
+
+const (
+	// ResourceMemory analyzes memory usage and limits
+	ResourceMemory ResourceKind = "memory"
+	// ResourceCPU analyzes CPU usage and limits
+	ResourceCPU ResourceKind = "cpu"
+)
+
+// SortKey represents the sorting strategy for results.
+type SortKey string
+
+const (
+	// SortByPercentage sorts by usage/limit percentage (descending)
+	SortByPercentage SortKey = "pct"
+	// SortByUsage sorts by raw usage values (descending)
+	SortByUsage SortKey = "usage"
+	// SortByLimit sorts by raw limit values (descending)
+	SortByLimit SortKey = "limit"
+)
+
+// Options contains all configuration parameters for the kubectl-usage tool.
+// This structure encapsulates all runtime configuration, making it easy to
+// pass configuration through the application layers and enabling better testability.
+type Options struct {
+	// Namespace specifies the target Kubernetes namespace
+	Namespace string
+	// AllNamespaces indicates whether to analyze across all namespaces
+	AllNamespaces bool
+	// LabelSelector is a Kubernetes label selector for filtering resources
+	LabelSelector string
+	// ExcludeNamespaces is a compiled regex for excluding namespaces
+	ExcludeNamespaces *regexp.Regexp
+	// Mode determines the analysis granularity (pods vs containers)
+	Mode Mode
+	// Resource specifies which resource type to analyze
+	Resource ResourceKind
+	// Sort determines the sorting strategy for results
+	Sort SortKey
+	// TopN limits the number of results returned
+	TopN int
+	// NoHeaders suppresses table headers in output
+	NoHeaders bool
+	// Timeout configures the context timeout for Kubernetes API calls
+	Timeout time.Duration
+}
+
+// Validate performs comprehensive validation of the configuration options.
+// This method implements defensive programming practices essential for reliable
+// distributed systems by validating inputs early and providing clear error messages.
+func (o *Options) Validate() error {
+	// Validate timeout
+	if o.Timeout <= 0 {
+		return fmt.Errorf("timeout must be positive, got %v", o.Timeout)
+	}
+
+	// Validate TopN
+	if o.TopN < 0 {
+		return fmt.Errorf("top must be non-negative, got %d", o.TopN)
+	}
+
+	// Validate label selector format (basic validation)
+	if o.LabelSelector != "" {
+		// Basic validation - more comprehensive validation happens in the collector
+		if strings.Contains(o.LabelSelector, ",,") {
+			return fmt.Errorf("invalid label selector format: %s", o.LabelSelector)
+		}
+	}
+
+	return nil
+}
+
+// String returns a human-readable representation of the configuration.
+// This is useful for debugging and logging in distributed environments.
+func (o *Options) String() string {
+	return fmt.Sprintf("Options{Namespace:%q, AllNamespaces:%t, LabelSelector:%q, Mode:%q, Resource:%q, Sort:%q, TopN:%d, NoHeaders:%t, Timeout:%v}",
+		o.Namespace, o.AllNamespaces, o.LabelSelector, o.Mode, o.Resource, o.Sort, o.TopN, o.NoHeaders, o.Timeout)
+}
