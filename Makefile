@@ -1,7 +1,3 @@
-# Variables
-BINARY_NAME  :=kubectl-usage
-VERSION.     ?=$(shell git describe --tags --always --dirty)
-
 # Go 
 GO111MODULE     := on
 CGO_ENABLED	    := 0
@@ -49,8 +45,7 @@ lint: lint-go lint-yaml ## Lints the entire project
 
 .PHONY: lint-go
 lint-go: ## Lints the Go files
-	@set -e; \
-	echo "Running golangci-lint"; \
+	@echo "Running golangci-lint..."
 	$(GO_ENV) golangci-lint -c .golangci.yaml run
 
 .PHONY: lint-yaml
@@ -89,22 +84,20 @@ ci: fmt vet lint test ## Run all CI checks
 # Release 
 .PHONY: bump-major
 bump-major: ## Bumps major version (1.2.3 → 2.0.0)
+	@echo "Bumping major version..."
 	tools/bump major
 
 .PHONY: bump-minor
 bump-minor: ## Bumps minor version (1.2.3 → 1.3.0)
+	@echo "Bumping minor version..."
 	tools/bump minor
 
 .PHONY: bump-patch
 bump-patch: ## Bumps patch version (1.2.3 → 1.2.4)
+	@echo "Bumping patch version..."
 	tools/bump patch
 
 .PHONY: release
 release: clean ## Runs the release process
-	@echo "Releasing version $(VERSION)..."
-	$(GO_ENV) GITLAB_TOKEN="" goreleaser release --clean --config .goreleaser.yaml --fail-fast --timeout 10m0s
-
-.PHONY: release-test
-release-test: clean ## Runs the release process
-	@echo "Releasing version $(VERSION)..."
-	$(GO_ENV) GITLAB_TOKEN="" goreleaser release --clean --config .goreleaser.yaml --fail-fast --timeout 10m0s --snapshot
+	@echo "Releasing new version..."
+	GITLAB_TOKEN="" goreleaser release --clean --config .goreleaser.yaml --fail-fast --timeout 10m0s

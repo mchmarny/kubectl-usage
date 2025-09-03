@@ -9,8 +9,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/mchmarny/kubectl-usage/pkg/config"
-	"github.com/mchmarny/kubectl-usage/pkg/metrics"
+	"github.com/mchmarny/kusage/pkg/config"
+	"github.com/mchmarny/kusage/pkg/metrics"
 )
 
 // Formatter handles the formatting and presentation of analysis results.

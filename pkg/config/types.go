@@ -1,4 +1,4 @@
-// Package config provides configuration management for kubectl-usage.
+// Package config provides configuration management for kusage.
 // This package encapsulates all configuration-related types and validation logic,
 // following the single responsibility principle for distributed systems design.
 package config
@@ -42,7 +42,7 @@ const (
 	SortByLimit SortKey = "limit"
 )
 
-// Options contains all configuration parameters for the kubectl-usage tool.
+// Options contains all configuration parameters for the kusage tool.
 // This structure encapsulates all runtime configuration, making it easy to
 // pass configuration through the application layers and enabling better testability.
 type Options struct {

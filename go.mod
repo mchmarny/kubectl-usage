@@ -1,4 +1,4 @@
-module github.com/mchmarny/kubectl-usage
+module github.com/mchmarny/kusage
 
 go 1.25.0
 

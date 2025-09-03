@@ -1,4 +1,4 @@
-// Package cli provides command-line interface functionality for kubectl-usage.
+// Package cli provides command-line interface functionality for kusage.
 // This package implements the command pattern and encapsulates all CLI-specific logic,
 // including argument parsing, validation, and help text generation.
 package cli
@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mchmarny/kubectl-usage/pkg/config"
+	"github.com/mchmarny/kusage/pkg/config"
 )
 
 const (
 	// Name of the CLI program.
-	Name = "kubectl-usage"
+	Name = "kusage"
 )
 
 var (
@@ -70,7 +70,7 @@ func (p *Parser) Parse(args []string) (*config.Options, error) {
 		allNamespaces = fs.Bool("A", false, "If present, list across all namespaces")
 		namespace     = fs.String("n", "default", "Namespace to use (ignored with -A)")
 		labelSelector = fs.String("l", "", "Label selector")
-		excludeNS     = fs.String("exclude-ns", "", "Regex of namespaces to exclude (e.g. ^(osmo-prod|gpu-operator)$)")
+		excludeNS     = fs.String("ns", "", "Regex of namespaces to exclude (e.g. ^(osmo-prod|gpu-operator)$)")
 		resource      = fs.String("resource", "memory", "Resource to score: memory|cpu (default: memory)")
 		sortBy        = fs.String("sort", "pct", "Sort key: pct|usage|limit (default: pct)")
 		topN          = fs.Int("top", 20, "Show top N rows")
@@ -99,7 +99,7 @@ func (p *Parser) Parse(args []string) (*config.Options, error) {
 	if *excludeNS != "" {
 		excludeRegex, err := regexp.Compile(*excludeNS)
 		if err != nil {
-			return nil, fmt.Errorf("invalid --exclude-ns regex: %w", err)
+			return nil, fmt.Errorf("invalid --ns regex: %w", err)
 		}
 		opts.ExcludeNamespaces = excludeRegex
 	}
@@ -150,21 +150,21 @@ func (p *Parser) parseSort(sortKey string) config.SortKey {
 // This method provides detailed help text following Unix CLI conventions
 // and includes examples for common use cases.
 func (p *Parser) PrintUsage() {
-	fmt.Fprintf(os.Stderr, `kubectl-saturation — rank pods/containers by resource limit saturation
+	fmt.Fprintf(os.Stderr, `kusage — rank pods/containers by resource limit usage
 
 Usage:
-  kubectl saturation pods [flags]
-  kubectl saturation containers [flags]
+  kusage pods [flags]
+  kusage containers [flags]
 
 Flags:
   -A                         All namespaces
   -n string                  Namespace (ignored with -A) (default "default")
   -l string                  Label selector
-      --exclude-ns string    Regex of namespaces to exclude (e.g. ^(osmo-prod|gpu-operator)$)
-      --resource string      Resource to score: memory|cpu (default memory)
-      --sort string          Sort key: pct|usage|limit (default pct)
-      --top int              Show top N rows (default 20)
-      --no-headers           Suppress headers
+  --ns string                Regex of namespaces to exclude (e.g. ^(osmo-prod|gpu-operator)$)
+  --resource string          Resource to score: memory|cpu (default memory)
+  --sort string              Sort key: pct|usage|limit (default pct)
+  --top int                  Show top N rows (default 20)
+  --no-headers               Suppress headers
 
 Requirements:
   This tool requires the following permissions:
@@ -173,8 +173,8 @@ Requirements:
   - metrics-server must be installed and running in the cluster
 
 Examples:
-  kubectl saturation pods -A --sort=pct --top=20 --exclude-ns='^(kube-system|monitoring)$'
-  kubectl saturation containers -A --resource=cpu --sort=pct --top=50
+  kusage pods -A --sort pct --top 20 --ns '^(kube-system|monitoring)$'
+  kusage containers -A --resource pct --sort memory --top 50
 
 For more information on metrics-server installation:
   https://github.com/kubernetes-sigs/metrics-server

@@ -6,8 +6,8 @@ package analyzer
 import (
 	"sort"
 
-	"github.com/mchmarny/kubectl-usage/pkg/config"
-	"github.com/mchmarny/kubectl-usage/pkg/metrics"
+	"github.com/mchmarny/kusage/pkg/config"
+	"github.com/mchmarny/kusage/pkg/metrics"
 )
 
 // Analyzer provides methods for analyzing and sorting resource usage data.

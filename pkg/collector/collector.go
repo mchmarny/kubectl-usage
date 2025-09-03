@@ -17,8 +17,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	metricsv "k8s.io/metrics/pkg/client/clientset/versioned"
 
-	"github.com/mchmarny/kubectl-usage/pkg/config"
-	"github.com/mchmarny/kubectl-usage/pkg/metrics"
+	"github.com/mchmarny/kusage/pkg/config"
+	"github.com/mchmarny/kusage/pkg/metrics"
 )
 
 // Collector handles the collection and correlation of Kubernetes resource data.

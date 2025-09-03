@@ -3,8 +3,8 @@ package analyzer
 import (
 	"testing"
 
-	"github.com/mchmarny/kubectl-usage/pkg/config"
-	"github.com/mchmarny/kubectl-usage/pkg/metrics"
+	"github.com/mchmarny/kusage/pkg/config"
+	"github.com/mchmarny/kusage/pkg/metrics"
 )
 
 func TestAnalyzer_Sort(t *testing.T) {

@@ -111,5 +111,5 @@ func configureClientDefaults(config *rest.Config) {
 
 	// UserAgent helps with debugging and monitoring in distributed environments
 	// It allows cluster administrators to identify traffic from this tool
-	config.UserAgent = "kubectl-usage/1.0"
+	config.UserAgent = "kusage/1.0"
 }

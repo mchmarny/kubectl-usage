@@ -5,11 +5,11 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/mchmarny/kubectl-usage/pkg/analyzer"
-	"github.com/mchmarny/kubectl-usage/pkg/cli"
-	"github.com/mchmarny/kubectl-usage/pkg/collector"
-	"github.com/mchmarny/kubectl-usage/pkg/k8s"
-	"github.com/mchmarny/kubectl-usage/pkg/output"
+	"github.com/mchmarny/kusage/pkg/analyzer"
+	"github.com/mchmarny/kusage/pkg/cli"
+	"github.com/mchmarny/kusage/pkg/collector"
+	"github.com/mchmarny/kusage/pkg/k8s"
+	"github.com/mchmarny/kusage/pkg/output"
 )
 
 func main() {

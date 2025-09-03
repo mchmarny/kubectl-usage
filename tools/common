@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Globals
-PROJECT_NAME="kubectl-usage"
+PROJECT_NAME="kusage"
 
 # Define some variables
 COLOR_GREEN='\033[0;32m'
