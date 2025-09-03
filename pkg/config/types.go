@@ -74,14 +74,10 @@ type Options struct {
 	PageSize int64
 	// MaxConcurrency limits concurrent operations
 	MaxConcurrency int
-	// UseStreaming enables streaming processing for memory efficiency
-	UseStreaming bool
 	// EnableMetrics enables detailed performance metrics collection
 	EnableMetrics bool
 	// MaxMemoryMB sets the maximum memory usage limit in megabytes
 	MaxMemoryMB int64
-	// UseFilters enables advanced filtering to reduce data volume
-	UseFilters bool
 }
 
 // Validate performs comprehensive validation of the configuration options.
@@ -133,9 +129,6 @@ func (o *Options) ApplyDefaults() {
 	if o.MaxMemoryMB == 0 {
 		o.MaxMemoryMB = 2048
 	}
-	// Enable advanced features for large-scale operations by default
-	o.UseStreaming = true
-	o.UseFilters = true
 }
 
 // String returns a human-readable representation of the configuration.

@@ -114,10 +114,8 @@ func (p *Parser) Parse(args []string) (*config.Options, error) {
 		// Performance options for large-scale operations
 		PageSize:       *pageSize,
 		MaxConcurrency: *maxConcurrency,
-		UseStreaming:   true,
 		EnableMetrics:  *enableMetrics,
 		MaxMemoryMB:    *maxMemoryMB,
-		UseFilters:     true,
 	}
 
 	// Parse and validate namespace exclusion regex
