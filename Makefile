@@ -63,8 +63,8 @@ deps: ## Download and tidy dependencies
 	$(GO_ENV) go mod download
 	$(GO_ENV) go mod tidy
 
-.PHONY: deps-update
-deps-update: ## Update dependencies
+.PHONY: upgrade
+upgrade: ## Upgrade all dependencies to latest versions
 	@echo "Updating dependencies..."
 	$(GO_ENV) go get -u ./...
 	$(GO_ENV) go mod tidy

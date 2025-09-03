@@ -5,6 +5,7 @@ package k8s
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"k8s.io/client-go/kubernetes"
@@ -25,9 +26,6 @@ type ClientManager struct {
 // NewClientManager creates a new Kubernetes client manager with production-ready defaults.
 // This function implements the factory pattern and handles the complex client configuration
 // logic required for reliable operation in various Kubernetes environments.
-//
-// The configuration follows Kubernetes client-go best practices documented at:
-// https://pkg.go.dev/k8s.io/client-go/rest#Config
 func NewClientManager() (*ClientManager, error) {
 	config, err := loadConfig()
 	if err != nil {
@@ -72,9 +70,6 @@ func (cm *ClientManager) Config() *rest.Config {
 // loadConfig attempts to load Kubernetes configuration using the standard precedence:
 // 1. kubeconfig file (standard kubectl configuration)
 // 2. in-cluster configuration (when running inside a pod)
-//
-// This follows the same precedence as kubectl and other Kubernetes tools.
-// Reference: https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/
 func loadConfig() (*rest.Config, error) {
 	// Try standard kubeconfig chain (works for kubectl plugins)
 	rules := clientcmd.NewDefaultClientConfigLoadingRules()
@@ -93,23 +88,41 @@ func loadConfig() (*rest.Config, error) {
 }
 
 // configureClientDefaults sets production-ready defaults for Kubernetes clients.
-// These values are optimized for CLI tools that need responsive UX while being considerate
+// These values are optimized for large-scale cluster operations while being considerate
 // of API server resources in distributed environments.
-//
-// Configuration follows Kubernetes API machinery best practices:
-// https://kubernetes.io/docs/reference/config-api/apiserver-config.v1alpha1/
 func configureClientDefaults(config *rest.Config) {
 	// QPS and Burst control client-side rate limiting to the API server
-	// For CLI tools, these should be moderate to avoid overwhelming the API server
-	// while still providing responsive UX
-	config.QPS = 50.0  // Allow up to 50 requests per second
-	config.Burst = 100 // Allow bursts up to 100 requests
+	// For large-scale operations, these values are significantly higher than default
+	// Reference: https://kubernetes.io/docs/concepts/cluster-administration/system-traces/
+	config.QPS = 300.0 // Allow up to 300 requests per second for large clusters
+	config.Burst = 600 // Allow bursts up to 600 requests for pagination efficiency
 
 	// Timeout controls how long to wait for individual API calls
-	// 30s is reasonable for CLI tools - long enough for most operations but not infinite
-	config.Timeout = 30 * time.Second
+	// Increased for large result sets that may take longer to process
+	config.Timeout = 60 * time.Second
 
 	// UserAgent helps with debugging and monitoring in distributed environments
 	// It allows cluster administrators to identify traffic from this tool
 	config.UserAgent = "kusage/1.0"
+
+	// Configure connection pool settings for better performance
+	// Use the WrapTransport field to customize the underlying transport
+	// This approach is compatible with TLS and authentication handling
+	if config.WrapTransport == nil {
+		config.WrapTransport = func(rt http.RoundTripper) http.RoundTripper {
+			// Only wrap if we get the default transport
+			if transport, ok := rt.(*http.Transport); ok {
+				// Clone the transport to avoid modifying the original
+				newTransport := transport.Clone()
+				// Optimize for large-scale operations
+				newTransport.MaxIdleConns = 100
+				newTransport.MaxIdleConnsPerHost = 20
+				newTransport.IdleConnTimeout = 90 * time.Second
+				newTransport.DisableCompression = false // Enable compression for large payloads
+				return newTransport
+			}
+			// Return the original transport if it's not an *http.Transport
+			return rt
+		}
+	}
 }

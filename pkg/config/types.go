@@ -66,6 +66,20 @@ type Options struct {
 	NoHeaders bool
 	// Timeout configures the context timeout for Kubernetes API calls
 	Timeout time.Duration
+
+	// Performance and scale options for large clusters
+	// PageSize controls the number of items fetched per API call
+	PageSize int64
+	// MaxConcurrency limits concurrent operations
+	MaxConcurrency int
+	// UseStreaming enables streaming processing for memory efficiency
+	UseStreaming bool
+	// EnableMetrics enables detailed performance metrics collection
+	EnableMetrics bool
+	// MaxMemoryMB sets the maximum memory usage limit in megabytes
+	MaxMemoryMB int64
+	// UseFilters enables advanced filtering to reduce data volume
+	UseFilters bool
 }
 
 // Validate performs comprehensive validation of the configuration options.
@@ -90,7 +104,36 @@ func (o *Options) Validate() error {
 		}
 	}
 
+	// Validate performance options
+	if o.PageSize <= 0 {
+		o.PageSize = 500 // Default page size for large clusters
+	}
+
+	if o.MaxConcurrency <= 0 {
+		o.MaxConcurrency = 10 // Default concurrency limit
+	}
+
+	if o.MaxMemoryMB <= 0 {
+		o.MaxMemoryMB = 2048 // Default 2GB memory limit
+	}
+
 	return nil
+}
+
+// ApplyDefaults sets default values for performance options
+func (o *Options) ApplyDefaults() {
+	if o.PageSize == 0 {
+		o.PageSize = 500
+	}
+	if o.MaxConcurrency == 0 {
+		o.MaxConcurrency = 10
+	}
+	if o.MaxMemoryMB == 0 {
+		o.MaxMemoryMB = 2048
+	}
+	// Enable advanced features for large-scale operations by default
+	o.UseStreaming = true
+	o.UseFilters = true
 }
 
 // String returns a human-readable representation of the configuration.
