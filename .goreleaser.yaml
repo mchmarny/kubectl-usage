@@ -25,15 +25,6 @@ builds:
     goarch:
       - amd64
       - arm64
-    hooks:
-      post:
-        # Only sign macOS binaries if we have signing credentials
-        - cmd: |
-            if [[ "{{ .Os }}" == "darwin" && -n "$APPLE_DEVELOPER_ID" ]]; then
-              codesign --force --sign "$APPLE_DEVELOPER_ID" --timestamp "{{ .Path }}"
-            fi
-          env:
-            - APPLE_DEVELOPER_ID={{ .Env.APPLE_DEVELOPER_ID }}
 
 gomod:
   proxy: false
