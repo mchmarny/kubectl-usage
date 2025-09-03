@@ -54,6 +54,8 @@ type Options struct {
 	LabelSelector string
 	// ExcludeNamespaces is a compiled regex for excluding namespaces
 	ExcludeNamespaces *regexp.Regexp
+	// ExcludeLabels is a compiled regex for excluding labels
+	ExcludeLabels *regexp.Regexp
 	// Mode determines the analysis granularity (pods vs containers)
 	Mode Mode
 	// Resource specifies which resource type to analyze
@@ -139,6 +141,29 @@ func (o *Options) ApplyDefaults() {
 // String returns a human-readable representation of the configuration.
 // This is useful for debugging and logging in distributed environments.
 func (o *Options) String() string {
-	return fmt.Sprintf("Options{Namespace:%q, AllNamespaces:%t, LabelSelector:%q, Mode:%q, Resource:%q, Sort:%q, TopN:%d, NoHeaders:%t, Timeout:%v}",
-		o.Namespace, o.AllNamespaces, o.LabelSelector, o.Mode, o.Resource, o.Sort, o.TopN, o.NoHeaders, o.Timeout)
+	return fmt.Sprintf(`Options{
+		AllNamespaces:%t, 
+		Namespace:%q, 
+		LabelSelector:%q, 
+		NamespaceExclusion:%q, 
+		LabelExclusion:%q, 
+		Mode:%q, 
+		Resource:%q, 
+		Sort:%q, 
+		TopN:%d, 
+		NoHeaders:%t, 
+		Timeout:%v
+	}`,
+		o.AllNamespaces,
+		o.Namespace,
+		o.LabelSelector,
+		o.ExcludeNamespaces,
+		o.ExcludeLabels,
+		o.Mode,
+		o.Resource,
+		o.Sort,
+		o.TopN,
+		o.NoHeaders,
+		o.Timeout,
+	)
 }

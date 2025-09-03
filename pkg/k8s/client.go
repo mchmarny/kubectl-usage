@@ -93,7 +93,6 @@ func loadConfig() (*rest.Config, error) {
 func configureClientDefaults(config *rest.Config) {
 	// QPS and Burst control client-side rate limiting to the API server
 	// For large-scale operations, these values are significantly higher than default
-	// Reference: https://kubernetes.io/docs/concepts/cluster-administration/system-traces/
 	config.QPS = 300.0 // Allow up to 300 requests per second for large clusters
 	config.Burst = 600 // Allow bursts up to 600 requests for pagination efficiency
 

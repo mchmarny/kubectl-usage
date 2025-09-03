@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"runtime"
+	"strings"
 	"sync"
 
 	"golang.org/x/sync/errgroup"
@@ -255,6 +256,14 @@ func (c *StreamingCollector) indexPodPage(pods []corev1.Pod, opts config.Options
 			continue
 		}
 
+		// Check label exclusion
+		if opts.ExcludeLabels != nil {
+			labelString := formatLabels(pod.Labels)
+			if opts.ExcludeLabels.MatchString(labelString) {
+				continue
+			}
+		}
+
 		key := pod.Namespace + "/" + pod.Name
 		podIndex.Store(key, metrics.NewPodSpecInfo(pod))
 	}
@@ -307,4 +316,18 @@ func (c *StreamingCollector) processMetricsPage(
 func (c *StreamingCollector) WithMaxConcurrency(maxConcurrency int64) *StreamingCollector {
 	c.maxConcurrency = maxConcurrency
 	return c
+}
+
+// formatLabels converts a label map to a string for regex matching
+// Format: "key1=value1,key2=value2"
+func formatLabels(labels map[string]string) string {
+	if len(labels) == 0 {
+		return ""
+	}
+
+	parts := make([]string, 0, len(labels))
+	for key, value := range labels {
+		parts = append(parts, key+"="+value)
+	}
+	return strings.Join(parts, ",")
 }

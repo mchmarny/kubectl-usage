@@ -81,6 +81,7 @@ func (p *Parser) Parse(args []string) (*config.Options, error) {
 		namespace     = fs.String("n", "default", "Namespace to use (ignored with -A)")
 		labelSelector = fs.String("l", "", "Label selector")
 		excludeNS     = fs.String("nx", "", "Regex of namespaces to exclude (e.g. ^(kube-system|gpu-operator)$)")
+		excludeLabels = fs.String("lx", "", "Regex of labels to exclude (e.g. ^(app=system|tier=infrastructure)$)")
 		resource      = fs.String("resource", "memory", "Resource to score: memory|cpu (default: memory)")
 		sortBy        = fs.String("sort", "pct", "Sort key: pct|usage|limit (default: pct)")
 		topN          = fs.Int("top", 20, "Show top N rows")
@@ -89,10 +90,8 @@ func (p *Parser) Parse(args []string) (*config.Options, error) {
 		// Performance flags for large-scale operations
 		pageSize       = fs.Int64("page-size", 500, "Number of items to fetch per API call")
 		maxConcurrency = fs.Int("max-concurrency", 10, "Maximum number of concurrent operations")
-		useStreaming   = fs.Bool("streaming", true, "Enable streaming processing for memory efficiency")
 		enableMetrics  = fs.Bool("metrics", false, "Enable detailed performance metrics collection")
 		maxMemoryMB    = fs.Int64("max-memory", 2048, "Maximum memory usage in MB")
-		useFilters     = fs.Bool("filters", true, "Enable advanced filtering to reduce data volume")
 	)
 
 	// Parse flags from the remaining arguments
@@ -115,10 +114,10 @@ func (p *Parser) Parse(args []string) (*config.Options, error) {
 		// Performance options for large-scale operations
 		PageSize:       *pageSize,
 		MaxConcurrency: *maxConcurrency,
-		UseStreaming:   *useStreaming,
+		UseStreaming:   true,
 		EnableMetrics:  *enableMetrics,
 		MaxMemoryMB:    *maxMemoryMB,
-		UseFilters:     *useFilters,
+		UseFilters:     true,
 	}
 
 	// Parse and validate namespace exclusion regex
@@ -128,6 +127,15 @@ func (p *Parser) Parse(args []string) (*config.Options, error) {
 			return nil, fmt.Errorf("invalid --nx regex: %w", err)
 		}
 		opts.ExcludeNamespaces = excludeRegex
+	}
+
+	// Parse and validate label exclusion regex
+	if *excludeLabels != "" {
+		excludeRegex, err := regexp.Compile(*excludeLabels)
+		if err != nil {
+			return nil, fmt.Errorf("invalid --lx regex: %w", err)
+		}
+		opts.ExcludeLabels = excludeRegex
 	}
 
 	// Validate the complete configuration
@@ -187,6 +195,7 @@ Basic Flags:
   -n string                  Namespace (ignored with -A) (default "default")
   -l string                  Label selector
   --nx string                Regex of namespaces to exclude (e.g. ^(kube-system|gpu-operator)$)
+  --lx string                Regex of labels to exclude (e.g. ^(app=system|tier=infrastructure)$)
   --resource string          Resource to score: memory|cpu (default memory)
   --sort string              Sort key: pct|usage|limit (default pct)
   --top int                  Show top N rows (default 20)
@@ -195,10 +204,8 @@ Basic Flags:
 Performance Flags (for large clusters):
   --page-size int            Items to fetch per API call (default 500)
   --max-concurrency int      Maximum concurrent operations (default 10)
-  --streaming                Enable streaming processing (default true)
   --metrics                  Enable performance metrics collection (default false)
   --max-memory int           Maximum memory usage in MB (default 2048)
-  --filters                  Enable advanced filtering (default true)
 
 Other Flags:
   -h, --help                 Show help
@@ -210,8 +217,8 @@ Requirements:
   - metrics-server must be installed and running in the cluster
 
 Examples:
-  kusage pods -A --sort pct --top 20 --nx '^(kube-system|monitoring)$'
-  kusage containers -A --resource pct --sort memory --top 50
+  kusage pods -A --nx '^(kube-system|monitoring)$' --lx '^(app=system|tier=infrastructure)$'
+  kusage containers -n gpu-operator --resource cpu --sort memory --top 50
 
 `)
 }

@@ -40,16 +40,6 @@ func New(coreClient *kubernetes.Clientset, metricsClient *metricsv.Clientset) *C
 // Collect gathers pod specifications and metrics data, then correlates them to produce
 // resource usage analysis results. This method implements concurrent data collection
 // using errgroup for improved performance in distributed environments.
-//
-// The collection process follows these steps:
-// 1. Concurrently fetch pod specifications and metrics from Kubernetes APIs
-// 2. Apply filters (namespace exclusions, label selectors)
-// 3. Index pod specifications for efficient lookup
-// 4. Correlate metrics with specifications to compute usage percentages
-// 5. Return structured results for further processing
-//
-// This design follows the scatter-gather pattern common in distributed systems
-// and implements proper error handling and context cancellation.
 func (c *Collector) Collect(ctx context.Context, opts config.Options) ([]metrics.Row, error) {
 	var (
 		podsList    []corev1.Pod
@@ -197,6 +187,14 @@ func (c *Collector) correlateData(pods []corev1.Pod, podMetrics []metrics.PodMet
 		// Apply namespace exclusion filter
 		if opts.ExcludeNamespaces != nil && opts.ExcludeNamespaces.MatchString(pod.Namespace) {
 			continue
+		}
+
+		// Apply label exclusion filter
+		if opts.ExcludeLabels != nil {
+			labelString := formatLabels(pod.Labels)
+			if opts.ExcludeLabels.MatchString(labelString) {
+				continue
+			}
 		}
 
 		// Apply label selector filter

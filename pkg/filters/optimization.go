@@ -35,14 +35,16 @@ func OptimizedListOptions(labelSelector string, pageSize int64, continueToken st
 // PodFilter provides efficient pod filtering logic
 type PodFilter struct {
 	excludeNamespaces *regexp.Regexp
+	excludeLabels     *regexp.Regexp
 	includePhases     map[corev1.PodPhase]bool
 	minResourceLimits bool
 }
 
 // NewPodFilter creates a new pod filter with the specified criteria
-func NewPodFilter(excludeNamespaces *regexp.Regexp, minResourceLimits bool) *PodFilter {
+func NewPodFilter(excludeNamespaces *regexp.Regexp, excludeLabels *regexp.Regexp, minResourceLimits bool) *PodFilter {
 	return &PodFilter{
 		excludeNamespaces: excludeNamespaces,
+		excludeLabels:     excludeLabels,
 		minResourceLimits: minResourceLimits,
 		includePhases: map[corev1.PodPhase]bool{
 			corev1.PodRunning: true,
@@ -56,6 +58,14 @@ func (f *PodFilter) ShouldIncludePod(pod *corev1.Pod) bool {
 	// Check namespace exclusion
 	if f.excludeNamespaces != nil && f.excludeNamespaces.MatchString(pod.Namespace) {
 		return false
+	}
+
+	// Check label exclusion
+	if f.excludeLabels != nil {
+		labelString := formatLabels(pod.Labels)
+		if f.excludeLabels.MatchString(labelString) {
+			return false
+		}
 	}
 
 	// Check pod phase
@@ -190,4 +200,18 @@ func (o *NamespaceOptimizer) GetOptimalPageSize(_ string, estimatedPodCount int)
 		return 200 // Medium pages for medium namespaces
 	}
 	return 500 // Large pages for large namespaces
+}
+
+// formatLabels converts a label map to a string for regex matching
+// Format: "key1=value1,key2=value2"
+func formatLabels(labels map[string]string) string {
+	if len(labels) == 0 {
+		return ""
+	}
+
+	parts := make([]string, 0, len(labels))
+	for key, value := range labels {
+		parts = append(parts, key+"="+value)
+	}
+	return strings.Join(parts, ",")
 }
