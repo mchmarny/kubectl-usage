@@ -33,19 +33,11 @@ kusage containers -n production --resource=memory --sort=limit --top=5
 
 You can install `kusage` CLI using one of the following ways:
 
-* [Go](#go)
 * [Homebrew](#homebrew)
+* [Go](#go)
 * [Binary](#binary)
 
 See the [release section](https://github.com/mchmarny/kusage/releases/latest) for `kusage` checksums and SBOMs.
-
-### Go
-
-If you have Go 1.17 or newer, you can install latest `vimp` using:
-
-```shell
-go install github.com/mchmarny/kusage/cmd/cli@latest
-```
 
 ### Homebrew
 
@@ -57,6 +49,14 @@ brew install kusage
 ```
 
 New release will be automatically picked up when you run `brew upgrade`
+
+### Go
+
+If you have Go 1.17 or newer, you can install latest `vimp` using:
+
+```shell
+go install github.com/mchmarny/kusage/cmd/cli@latest
+```
 
 ### Binary 
 
