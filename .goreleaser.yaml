@@ -50,6 +50,16 @@ release:
     name: kusage
   prerelease: auto
 
+homebrew_casks:
+  - name: kusage
+    commit_msg_template: "Brew cask update for {{ .ProjectName }} version {{ .Tag }}"
+    description: "Rank Kubernetes pods/containers by CPU/memory usage (usage ÷ limit)."
+    repository:
+      owner: mchmarny
+      name: homebrew-kusage
+      branch: main
+      token: "{{ .Env.HOMEBREW_TOKEN }}"
+
 archives:
   - id: kusage
     formats:
