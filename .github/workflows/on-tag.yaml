@@ -30,6 +30,16 @@ jobs:
           install-only: true
 
       - name: Run GoReleaser
+        id: releaser
         env:
-          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make release
+
+      - name: Gen Hashes
+        id: checksum
+        env:
+          ARTIFACTS: "${{ steps.releaser.outputs.artifacts }}"
+        run: |
+          set -euo pipefail
+          checksum_file=$(echo "$ARTIFACTS" | jq -r '.[] | select (.type=="Checksum") | .path')
+          echo "hashes=$(cat $checksum_file | base64 -w0)" >> $GITHUB_OUTPUT
