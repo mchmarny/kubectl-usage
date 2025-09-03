@@ -10,8 +10,8 @@ import (
 func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 		Level: slog.LevelWarn,
-		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
-			// Simplify log output by removing redundant "time" and "source" fields
+		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
+			// Simplify log output for CLI, remove "time" and "source" fields
 			if a.Key == "time" || a.Key == "source" {
 				return slog.Attr{}
 			}
