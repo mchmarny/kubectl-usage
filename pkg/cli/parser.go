@@ -31,13 +31,19 @@ var (
 // This type implements the command pattern and encapsulates all
 // CLI argument processing logic.
 type Parser struct {
-	programName string
+	programName    string
+	programVersion string
+	commitSha      string
+	builtTime      string
 }
 
 // NewParser creates a new CLI parser instance.
 func NewParser() *Parser {
 	return &Parser{
-		programName: Name,
+		programName:    Name,
+		programVersion: Version,
+		commitSha:      Commit,
+		builtTime:      Date,
 	}
 }
 
@@ -56,7 +62,11 @@ func (p *Parser) Parse(args []string) (*config.Options, error) {
 	if err != nil {
 		if subcommand == "-h" || subcommand == "--help" || subcommand == "help" {
 			p.PrintUsage()
-			return nil, nil // Not an error, just help request
+			return nil, nil
+		}
+		if subcommand == "-v" || subcommand == "--version" || subcommand == "version" {
+			fmt.Printf("%s version %s (commit: %s, date: %s)\n", p.programName, p.programVersion, p.commitSha, p.builtTime)
+			return nil, nil
 		}
 		p.PrintUsage()
 		return nil, err
@@ -70,7 +80,7 @@ func (p *Parser) Parse(args []string) (*config.Options, error) {
 		allNamespaces = fs.Bool("A", false, "If present, list across all namespaces")
 		namespace     = fs.String("n", "default", "Namespace to use (ignored with -A)")
 		labelSelector = fs.String("l", "", "Label selector")
-		excludeNS     = fs.String("nx", "", "Regex of namespaces to exclude (e.g. ^(osmo-prod|gpu-operator)$)")
+		excludeNS     = fs.String("nx", "", "Regex of namespaces to exclude (e.g. ^(kube-system|gpu-operator)$)")
 		resource      = fs.String("resource", "memory", "Resource to score: memory|cpu (default: memory)")
 		sortBy        = fs.String("sort", "pct", "Sort key: pct|usage|limit (default: pct)")
 		topN          = fs.Int("top", 20, "Show top N rows")
@@ -166,7 +176,7 @@ func (p *Parser) parseSort(sortKey string) config.SortKey {
 // This method provides detailed help text following Unix CLI conventions
 // and includes examples for common use cases.
 func (p *Parser) PrintUsage() {
-	fmt.Fprintf(os.Stderr, `kusage — rank pods/containers by resource limit usage
+	fmt.Fprintf(os.Stderr, `kusage — rank pods/containers by resource usage-to-limit ratio
 
 Usage:
   kusage pods [flags]
@@ -176,7 +186,7 @@ Basic Flags:
   -A                         All namespaces
   -n string                  Namespace (ignored with -A) (default "default")
   -l string                  Label selector
-  --nx string                Regex of namespaces to exclude (e.g. ^(osmo-prod|gpu-operator)$)
+  --nx string                Regex of namespaces to exclude (e.g. ^(kube-system|gpu-operator)$)
   --resource string          Resource to score: memory|cpu (default memory)
   --sort string              Sort key: pct|usage|limit (default pct)
   --top int                  Show top N rows (default 20)
@@ -190,10 +200,13 @@ Performance Flags (for large clusters):
   --max-memory int           Maximum memory usage in MB (default 2048)
   --filters                  Enable advanced filtering (default true)
 
+Other Flags:
+  -h, --help                 Show help
+  -v, --version              Show version
+
 Requirements:
-  This tool requires the following permissions:
-  - pods (get, list) in target namespaces
-  - pods/metrics (get, list) via metrics.k8s.io API group
+  - pods (get, list) permissions in target namespaces
+  - pods/metrics (get, list) permissions  via metrics.k8s.io API group
   - metrics-server must be installed and running in the cluster
 
 Examples:

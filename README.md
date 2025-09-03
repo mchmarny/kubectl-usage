@@ -1,6 +1,8 @@
 # kusage
 
-Rank Kubernetes pods/containers by CPU/memory usage (usage ÷ limit)
+Rank pods/containers by resource usage-to-limit ratio
+
+Features: 
 
 * Memory-bounded streaming (processes k8s data through bounded channels)
 * Adaptive pagination with API client/call optimization (chunked data retrieval)
@@ -10,10 +12,10 @@ Rank Kubernetes pods/containers by CPU/memory usage (usage ÷ limit)
 
 ```bash
 # Analyze pod-level memory usage with custom namespace filtering
-kusage pods -A --resource memory --nx '^(observability|kube-system|osmo)$' --top 10 --sort pct
+kusage pods -A --resource memory --nx '^(observability|kube-system)$' --top 10 --sort pct
 
 # Container analysis with custom sort and limit
-kusage containers -n production --resource=memory --sort=limit --top=5
+kusage containers -n production --resource=memory --sort limit --top 5
 ```
 
 ## Requirements
