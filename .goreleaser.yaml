@@ -16,9 +16,9 @@ builds:
       -w
       -s
       -extldflags "-static"
-      -X github.com/mchmarny/kusage/pkg/cli.version={{.Version}}
-      -X github.com/mchmarny/kusage/pkg/cli.commit={{.ShortCommit}}
-      -X github.com/mchmarny/kusage/pkg/cli.date={{.Date}}
+      -X github.com/mchmarny/kusage/pkg/cli.Version={{.Version}}
+      -X github.com/mchmarny/kusage/pkg/cli.Commit={{.ShortCommit}}
+      -X github.com/mchmarny/kusage/pkg/cli.Date={{.Date}}
     goos:
       - darwin
       - linux
