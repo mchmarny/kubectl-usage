@@ -2,20 +2,15 @@
 
 Rank Kubernetes pods/containers by CPU/memory usage (usage ÷ limit)
 
+* Memory-bounded streaming (processes k8s data through bounded channels)
+* Adaptive pagination with API client/call optimization (chunked data retrieval)
+* Circuit breaker with resource pools (prevent cascading failures)
+
 ## Usage
 
 ```bash
-# Analyze pod-level memory usage across all namespaces
-kusage pods -A
-
-# Analyze container-level CPU usage with custom namespace filtering
-kusage containers -A --resource=cpu --ns='^(kube-system|monitoring)$'
-
-# Show top 10 results sorted by raw usage
-kusage pods --sort=usage --top=10
-
-# Filter by label selector and sort by percentage
-kusage pods -l app=frontend --sort=pct
+# Analyze pod-level memory usage with custom namespace filtering
+kusage pods -A --resource memory --nx '^(observability|kube-system|osmo)$' --top 10 --sort pct
 
 # Container analysis with custom sort and limit
 kusage containers -n production --resource=memory --sort=limit --top=5
@@ -55,7 +50,7 @@ New release will be automatically picked up when you run `brew upgrade`
 If you have Go 1.17 or newer, you can install latest `vimp` using:
 
 ```shell
-go install github.com/mchmarny/kusage/cmd/cli@latest
+go install github.com/mchmarny/kusage/cmd/kusage@latest
 ```
 
 ### Binary 

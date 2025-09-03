@@ -6,7 +6,7 @@ builds:
   - binary: kusage
     # set the modified timestamp on the output binary to the git timestamp to ensure a reproducible build
     mod_timestamp: &build-timestamp '{{ .CommitTimestamp }}'
-    dir: cmd/cli
+    dir: cmd/kusage
     env:
       - CGO_ENABLED=0
       - GO111MODULE=on
